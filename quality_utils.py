@@ -70,8 +70,9 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, in
         o3d.pipelines.registration.TransformationEstimationPointToPlane())
     return result
 
-def project_pcd_to_depth(pcd, camera_pose, scale = (480, 480), depth_max=1000.0, depth_scale=1000.0, focal_dist=400.0):
-    width, height = scale  
+# def project_pcd_to_depth(pcd, camera_pose, scale = (480, 480), depth_max=1000.0, depth_scale=1000.0, focal_dist=400.0): # Chair
+def project_pcd_to_depth(pcd, camera_pose, scale = (480, 640), depth_max=1000.0, depth_scale=1000.0, focal_dist=400.0): # Bunny
+    width, height = scale   
     pcd_t = o3d.t.geometry.PointCloud.from_legacy(pcd)
     intrinsics =o3d.core.Tensor([[focal_dist, 0     , width * 0.5], 
                                 [0     , focal_dist, height * 0.5],
