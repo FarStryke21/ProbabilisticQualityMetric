@@ -3,10 +3,14 @@ import open3d as o3d
 import numpy as np
 import copy
 
-target = loadPCD("data/chair_target.ply")
-source = loadPCD("data/chair_source.ply")
+target = loadPCD("data/owl_target.ply")
+source = loadPCD("data/owl_sampled.ply")
 
-voxel_size = 0.05
+# For Chair
+# voxel_size = 0.05
+
+# # For Owl
+voxel_size = 5
 
 # draw_registration_result(source, target, np.identity(4))
 

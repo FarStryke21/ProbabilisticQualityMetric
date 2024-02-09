@@ -5,8 +5,10 @@ import copy
 import matplotlib.pyplot as plt
 from math import *
 
-def loadPCD(filename):
+def loadPCD(filename, scale = 0):
     pcd = o3d.io.read_point_cloud(filename) 
+    if scale != 0:
+        pcd = scale_point_cloud(pcd, scale)
     return pcd
 
 def draw_registration_result(source, target, transformation):
@@ -90,3 +92,8 @@ def extract_translation_and_euler_angles(transformation_matrix):
     yaw_deg = degrees(yaw)
 
     return x, y, z, roll_deg, pitch_deg, yaw_deg
+
+# Function to scale a given point cloud
+def scale_point_cloud(pcd, scale_factor):
+    pcd.scale(scale_factor, center=pcd.get_center())
+    return pcd
