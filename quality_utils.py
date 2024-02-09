@@ -136,3 +136,26 @@ def get_p(I11, I12, I21, I22, sigma = 0.01):
     match_p = np.sum(net_p)/M
 
     return match_p
+
+def extract_translation_and_euler_angles(transformation_matrix):
+    """Extract translation and Euler angles from a transformation matrix."""
+    x, y, z = transformation_matrix[:3, 3]
+
+    # Extract rotation matrix
+    rotation_matrix = transformation_matrix[:3, :3]
+
+    # Roll (rotation around x-axis)
+    roll = atan2(rotation_matrix[2, 1], rotation_matrix[2, 2])
+    
+    # Pitch (rotation around y-axis)
+    pitch = atan2(-rotation_matrix[2, 0], np.sqrt(rotation_matrix[2, 1]**2 + rotation_matrix[2, 2]**2))
+    
+    # Yaw (rotation around z-axis)
+    yaw = atan2(rotation_matrix[1, 0], rotation_matrix[0, 0])
+
+    # Convert angles from radians to degrees
+    roll_deg = degrees(roll)
+    pitch_deg = degrees(pitch)
+    yaw_deg = degrees(yaw)
+
+    return x, y, z, roll_deg, pitch_deg, yaw_deg
