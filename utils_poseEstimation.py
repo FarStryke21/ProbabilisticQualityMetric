@@ -68,68 +68,25 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, in
         o3d.registration.TransformationEstimationPointToPlane())
     return result
 
-def project_pcd_to_depth(pcd, camera_pose, scale = (480, 480), depth_max=1000.0, depth_scale=1000.0, focal_dist=400.0):
-    width, height = scale  
-    pcd_t = o3d.t.geometry.PointCloud.from_legacy(pcd)
-    intrinsics =o3d.core.Tensor([[focal_dist, 0     , width * 0.5], 
-                                [0     , focal_dist, height * 0.5],
-                                [0     , 0     , 1]])
-    extrinsics = o3d.core.Tensor(camera_pose)
-    depth_reproj = pcd_t.project_to_depth_image(width,
-                                            height,
-                                            intrinsics,
-                                            extrinsics,
-                                            depth_scale=depth_scale,
-                                            depth_max=depth_max)
-      
-    depth_mat = np.asarray(depth_reproj.to_legacy())
-    plot = plt.imshow(depth_mat)
+def extract_translation_and_euler_angles(transformation_matrix):
+    """Extract translation and Euler angles from a transformation matrix."""
+    x, y, z = transformation_matrix[:3, 3]
+
+    # Extract rotation matrix
+    rotation_matrix = transformation_matrix[:3, :3]
+
+    # Roll (rotation around x-axis)
+    roll = atan2(rotation_matrix[2, 1], rotation_matrix[2, 2])
     
-    return depth_mat, plot
-
-def get_projections(C1, O1, C2, O2, save = False):
-    I11, plot_I11 = project_pcd_to_depth(C1, O1)
-    I12, plot_I12 = project_pcd_to_depth(C1, O2)
-    I21, plot_I21 = project_pcd_to_depth(C2, O1)
-    I22, plot_I22 = project_pcd_to_depth(C2, O2)
-
-    if save:
-        plt.imsave('I11.png', I11)
-        plt.imsave('I12.png', I12)
-        plt.imsave('I21.png', I21)
-        plt.imsave('I22.png', I22)
-
-    return I11, I12, I21, I22
-
-def get_p(I11, I12, I21, I22, sigma = 0.01):
-    def CDF(x):
-        return 1/2 * (1 + erf(x/sqrt(2)))
-
-    def p_calc(delJ, sigma):
-        p = 1 - (CDF(delJ/sigma) - CDF(-delJ/sigma))
-        return p
+    # Pitch (rotation around y-axis)
+    pitch = atan2(-rotation_matrix[2, 0], np.sqrt(rotation_matrix[2, 1]**2 + rotation_matrix[2, 2]**2))
     
-    I_pair = [(I11, I21),(I22, I12)]
-    # I_pair = [(I11, I12),(I22, I21)]
-    net_p = []
+    # Yaw (rotation around z-axis)
+    yaw = atan2(rotation_matrix[1, 0], rotation_matrix[0, 0])
 
-    for i,pair in enumerate(I_pair):
-        I1 = pair[0].flatten()
-        I2 = pair[1].flatten()
-        p = np.zeros_like(I1)
-        for i in range(I1.shape[0]):
-            if I1[i] != 0 and I2[i] != 0:
-                p[i] = p_calc(I1[i] - I2[i], sigma)
-            elif I1[i] == 0 and I2[i] == 0:
-                p[i] = 0
-            elif I1[i] == 0 and I2[i] != 0:
-                p[i] = p_calc(2*sigma, sigma)
+    # Convert angles from radians to degrees
+    roll_deg = degrees(roll)
+    pitch_deg = degrees(pitch)
+    yaw_deg = degrees(yaw)
 
-        net_p.extend(p.tolist())
-
-    net_p = np.array(net_p)
-    net_p = net_p.flatten()
-    M = np.count_nonzero(net_p)
-    match_p = np.sum(net_p)/M
-
-    return match_p
+    return x, y, z, roll_deg, pitch_deg, yaw_deg

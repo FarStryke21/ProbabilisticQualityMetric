@@ -1,5 +1,14 @@
 ## Probabilistic Quality Metric for registered Point Clouds of Objects
 
+
+### Support for Python2
+
+Open3d 0.9.0 supports Python 2.7
+The implementation uptil registration is function with Python2. Full implementation using Python2 is in progress. use **poseEstimation.py** to extract the pose difference between the two pointclouds
+
+--------
+### Full Support on the main branch
+
 This repository is a modified implementation of **Analyzing the Quality of Matched 3D Point Clouds of Objects** by Igor Bogoslavskyi and Cyrill Stachniss. ([link](https://doi.org/10.1109/IROS.2017.8206584))
 
 While the paper was developed for a dynamic real world set-up, this implementation is fine tuned for a lab environment and prioritizes accuracy over generalizability. The classification features mentioned in the paper have not been implemented. The idea here is to create a universal metric to compare quality of alignment in registered point clouds.
